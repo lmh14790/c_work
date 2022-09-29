@@ -1,0 +1,28 @@
+{
+    "files.associations": {
+        "_types.h": "c",
+        "ndbm.h": "c",
+        "gdbm-ndbm.h": "c",
+        "algorithm": "c",
+        "__node_handle": "c",
+        "errno.h": "c",
+        "unistd.h": "c",
+        "a.h": "c",
+        "stdio.h": "c",
+        "_stdio.h": "c",
+        "availability.h": "c",
+        "cdefs.h": "c",
+        "__hash_table": "c",
+        "__split_buffer": "c",
+        "array": "c",
+        "bitset": "c",
+        "initializer_list": "c",
+        "iterator": "c",
+        "string": "c",
+        "string_view": "c",
+        "unordered_map": "c",
+        "utility": "c",
+        "vector": "c",
+        "__tuple": "c"
+    }
+}

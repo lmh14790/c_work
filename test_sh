@@ -1,0 +1,9 @@
+#!/bin/bash
+for file in *
+do 
+ if grep -q 'include<stdio.h>' $file
+ then
+ echo $file
+ fi
+done
+exit 0 

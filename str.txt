@@ -1,0 +1,9 @@
+a
+ab
+abb
+abbbabb
+bbbbb
+bbabb1bb
+bba1bbbb
+123abbbbbb
+444aaaa
