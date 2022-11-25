@@ -18,15 +18,14 @@ int main(int argc, char *argv[]){
     {"john",3},
     {"rick",2},
     {"alex",1},
-     {"neil",4},
+    {"neil",4},
     {"john",3},
     {"rick",2},
     {"alex",1},
-     {"neil",4},
+    {"neil",4},
     {"john",3},
     {"rick",2},
-    {"alex",1}
-    };
+    {"alex",1}};
     int size = arraySize(array);
     show(array, size);
     insertSort(array, size);

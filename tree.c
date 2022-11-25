@@ -1,5 +1,5 @@
 #include "tree.h"
- 
+#include<unistd.h> 
 //初始化树
 void InitializeTree(Tree *tree){
     tree->root = NULL;
@@ -35,10 +35,10 @@ bool AddItem(const Item *item, Tree *tree, Compare compare){
     tree->items++;
     if(tree->root == NULL){
         tree->root = newNode;
+        return true;
     } else {
-        AddNodes(newNode, tree->root, compare);
+       return AddNodes(newNode, tree->root, compare);
     }
-    return true;
 }
 //删除数据
 bool DeleteItem(const Item *item, Tree *tree, Compare compare){
@@ -46,26 +46,17 @@ bool DeleteItem(const Item *item, Tree *tree, Compare compare){
      fprintf(stderr,"tree成员为空\n");
      return false;
     }
-    Pair pair = SeekItem(item, tree, compare);
+    Pair pair = SeekItemRecursion(item, &tree->root, &tree->root, compare);
     if(pair.child == NULL){
         fprintf(stderr,"当前成员不在树结构中\n");
         return false;
-    }
+    } 
     // if(pair.parent == NULL){
-    //     DeleteNode(&tree->root);
-    //     //删除左子节点
-    // } else if(pair.parent->left == pair.child){
-    //   //删除原始数据上的节点
-    //   DeleteNode(&pair.parent->left);
+    //     DeleteNodeWithParent(pair.child, pair.child, tree);
     // } else {
-    //     //删除右子节点  
-    // DeleteNode(&pair.parent->right);  
+    //     DeleteNodeWithParent(pair.child, pair.parent, tree);
     // }
-    if(pair.parent == NULL){
-        DeleteNodeWithParent(pair.child, pair.child, tree);
-    } else {
-        DeleteNodeWithParent(pair.child, pair.parent, tree);
-    }
+    DeleteNode(pair.childAddress);
     tree->items--;
     return true;
 };
@@ -76,7 +67,8 @@ bool InTree(const Item *item, const Tree *tree, Compare compare){
 //清除列表数据
 void DeleteAll(Tree *tree){
  if(tree != NULL){
-   DeleteAllNodes(tree->root);
+//    DeleteAllNodes(tree->root);
+   DeleteAllNodesLoop(tree->root, tree->items);
    tree->items = 0;
    tree->root = NULL;
  }
@@ -85,8 +77,8 @@ void DeleteAll(Tree *tree){
 void Traverse(const Tree *tree, CallBack callBack){
      if(TreeIsEmpty(tree)){
          fprintf(stderr, "当前树为空树\n");
-         exit(1);
-     } else {
+         return;
+     } else { 
       TraverseNode(tree->root, callBack);
      }
 }
@@ -95,6 +87,7 @@ Pair SeekItem(const Item *pi, const Tree *ptree, Compare compare){
     Pair look;
     look.parent = NULL;
     look.child = ptree->root;
+    look.childAddress = (Node **)&ptree->root;
     if(look.child == NULL){
         return look;
     }
@@ -103,14 +96,33 @@ Pair SeekItem(const Item *pi, const Tree *ptree, Compare compare){
       if(compare(pi, &(look.child->item)) == -1){
           look.parent = look.child;
           look.child = look.parent->left;
+          look.childAddress = (Node **)&look.parent->left; 
       } else if(compare(pi, &(look.child->item)) == 1){
           look.parent = look.child;
           look.child = look.parent->right;
+          look.childAddress = (Node **)&look.parent->right;
       } else {
           break;
       }
     }
     return look;
+}
+
+Pair SeekItemRecursion(const Item *pi, Node **parent, Node **root, Compare compare){
+   Pair pair;
+   pair.parent = parent[0];
+   pair.child  = root[0]; 
+   pair.childAddress = root;    
+   if(root[0] == NULL){
+      return pair; 
+   }
+   if(compare(pi, &(root[0]->item)) == -1){
+     pair = SeekItemRecursion(pi, root, &root[0]->left, compare);
+   } else if(compare(pi, &(root[0]->item)) == 1){
+     pair = SeekItemRecursion(pi, root, &root[0]->right, compare);
+   } else {
+     return pair; 
+   }
 }
 
 Node * MakeNodes(const Item *pi){
@@ -126,45 +138,77 @@ Node * MakeNodes(const Item *pi){
     return newNode;
 }
 
-void AddNodes(Node *newNode, Node *root, Compare compare){
+bool AddNodes(Node *newNode, Node *root, Compare compare){
+    bool res = false;
     if(compare(&(newNode->item), &(root->item)) == -1){
         if(root->left == NULL){
             root->left = newNode;
+            res = true;
         } else {
-            AddNodes(newNode, root->left, compare);
+          res = AddNodes(newNode, root->left, compare);        
         } 
     }  else if(compare(&(newNode->item), &(root->item)) == 1) {
         if(root->right == NULL){
             root->right = newNode;
+            res = true;
         } else {
-          AddNodes(newNode, root->right, compare);
+         res = AddNodes(newNode, root->right, compare); 
         }
     } else {
-            fprintf(stderr,"不能添加权重相同的节点\n");
-            exit(1);
+        fprintf(stderr,"不能添加权重相同的节点\n");
+        res = false;
     }
+    return res;
+}
+
+bool AddNodesLoop(Node *newNode, Node *root, Compare compare){
+    Node *previousNode = root;
+    bool res = false;
+    while (previousNode)
+    {   
+      if(compare(&(newNode->item), &(previousNode->item)) == -1){
+        if(previousNode->left == NULL){
+            previousNode->left = newNode;
+            res = true;
+            break;
+        } else {
+            previousNode = previousNode->left;
+        } 
+    }  else if(compare(&(newNode->item), &(previousNode->item)) == 1) {
+        if(previousNode->right == NULL){
+            previousNode->right = newNode;
+            res = true;
+            break;
+        } else {
+          previousNode = previousNode->right;
+        }
+    } else {
+        fprintf(stderr,"不能添加权重相同的节点\n");
+        res = false;
+        break;
+    }
+    }
+    return res;
 }
 //删除节点 为了给被删除节点赋值 所以选择传递当前节点指针的地址(用来替换指针)
 void DeleteNode(Node **ptr){
+    //该节点在树里面节点本身的地址
     Node* temp;
-    printf("被删除的数据为%d\n", (*ptr)->item.data);
-    if((*ptr)->left == NULL){
-        temp = *ptr;
-        *ptr = (*ptr)->right;
-        free(temp);
-    } else if((*ptr)->right == NULL) {
-        temp = *ptr;
-        *ptr = (*ptr)->left;
-        free(temp);
+    printf("被删除的数据为%d\n", ptr[0]->item.data);
+    if(ptr[0] -> right == NULL){
+       temp = ptr[0];
+       ptr[0] = ptr[0] -> left;
     } else {
-       for(temp = (*ptr)->left; temp->right != NULL; temp = temp->right){
-          continue;    
-       }
-       temp->right = (*ptr)->right;
-       temp = *ptr;
-       *ptr = (*ptr)->left;
-       free(temp);
+        temp = ptr[0];
+        ptr[0] = ptr[0] -> right;
+        Node* rightNodeMin =  ptr[0];
+        while (rightNodeMin -> left && rightNodeMin)
+        {
+             rightNodeMin =  rightNodeMin -> left;
+        }
+        rightNodeMin->left = temp->left;
     }
+    free(temp);
 }
  
 //这种写法要删除的节点是跟节点的时候不好处理 所以不要这样写
@@ -174,56 +218,41 @@ void DeleteNodeWithParent(Node* ptr, Node* parent, Tree *tree){
      fprintf(stderr,"被删除节点不能为空 父节点不能为空\n");
      return;  
     }
+    Node* temp = ptr;
+    temp = ptr->right;
     //要删除的节点是跟节点
     if(ptr == parent){
-      Node* temp;
-      if(ptr->left == NULL){
-         tree->root = ptr->right;
-         free(ptr);
-      } else if(ptr->right == NULL){
-        tree->root = ptr->left; 
-        free(ptr);
+      if(ptr->right != NULL){
+        tree->root = ptr->right;
       } else {
-        Node *temp;
-        //找到被删除节点第一个左节点的右侧节点(为空的地方)
-        for(temp = ptr->left; temp->right != NULL; temp = temp->right){
-          continue;
-        }
-        temp->right = ptr->right;
-        tree->root = ptr->left; 
-        free(ptr);
-      }
+        tree->root = ptr->left;
+      } 
     } else {
-    if(ptr->left == NULL){
-        //判断被删除的节点是父节点的左节点还是有节点
-         if(parent->left == ptr){
-            parent->left = ptr->right;
-        } else {
-            parent->right = ptr->right; 
-        }
-      free(ptr);
-    } else if(ptr->right == NULL){
-        if(parent->left == ptr){
-            parent->left = ptr->left;
-        } else {
-           parent->right = ptr->left; 
-        }
-      free(ptr);
-    } else {
-        Node *temp;
-        //找到被删除节点第一个左节点的右侧节点(为空的地方)
-        for(temp = ptr->left; temp->right != NULL; temp = temp->right){
-          continue;
-        }
-        temp->right = ptr->right;
-        if(parent->left == ptr){
-         parent->left = ptr->left;
-        } else {
-        parent->right = ptr->left;
-        } 
-        free(ptr);
+    //判断要删除的点是左节点和右节点
+    if(parent -> right == ptr){  
+     if(temp != NULL){
+       //右侧有节点是有右侧 
+       parent -> right = ptr -> right;
+     } else {
+       //右侧没有接地啊使用左侧数据 
+       parent -> right = ptr -> left; 
+     }
+    } else {  
+     if(temp != NULL) {
+       parent -> left = ptr -> right;
+     } else {
+       parent -> left = ptr -> left;
+     } 
     }
     }
+    //找到最右测节点的最小值
+    while (temp && temp->left)
+    {
+    temp = temp->left;
+    }
+    //将左侧节点赋值给最右侧节点的最小值
+    if(temp != NULL) temp->left = ptr->left;
+    free(ptr);
 }
 
 void TraverseNode(const Node *root, CallBack callBack){
@@ -234,45 +263,109 @@ void TraverseNode(const Node *root, CallBack callBack){
     }
 }
 
-//删除树节点
-void DeleteAllNodes(Node * node){
-    Node *pright;
-    if(node != NULL)
-    {   pright = node->right;
-        DeleteAllNodes(node->left);
-        free(node);
-        DeleteAllNodes(node->right);
+void TraverseNodeLoop(const Node *root, CallBack callBack, int size){
+    if(root){
+         const Node *previousNode = root;
+         const Node *tempArray[size];
+         int tempArraySize = 0; 
+         const Node *parentArray[size];
+         int parentArraySize = 0;    
+         while (previousNode)
+         {    
+            //当前节点的左子节点不为空
+            if(previousNode -> left != NULL){
+                int index = parentArraySize-1;
+                //如果当前节点结合中包含改节点说明已经找到最小节点 此时改节点是回退节点 所以应该指向该节点的右子节点
+               if(index >= 0 && previousNode -> item.data == parentArray[index] -> item.data){
+                   tempArray[tempArraySize++] = previousNode;
+                   parentArray[--parentArraySize] = NULL;
+                   if(previousNode -> right != NULL){
+                    previousNode = previousNode->right;
+                   } else {
+                    if(index == 0){
+                     break;
+                    } else previousNode =  parentArray[parentArraySize-1];
+                   }
+               } else {
+                parentArray[parentArraySize++] = previousNode;
+                previousNode = previousNode->left; 
+               } 
+            } else {
+                //当前节点左子节点为空 右子节点不为空
+               if(previousNode -> right !=  NULL){
+                tempArray[tempArraySize++] = previousNode;
+                previousNode = previousNode->right; 
+               } else { //当前节点左右子节点都为空
+               tempArray[tempArraySize++] = previousNode;
+               if(parentArraySize-1 >= 0){
+                  previousNode = parentArray[parentArraySize-1];
+               } else break;  
+               } 
+            }
+         }
+         for(int i =  0; i < tempArraySize; i++){
+            callBack(tempArray[i]->item);
+         }
     }
 }
 
-//遍历数据并回调 使用循环遍历数据
-void TraverseNotRecursion(const Tree *tree, CallBack callBack){
-    if(tree->items == 0){
-      fprintf(stderr, "当前树为空树\n");
-      exit(1);
-    } else {
-        Node *temp = tree->root;
-        Node* parent = NULL;  
-        int count = 0;
-        while (count < tree->items)
-        {
-        if(temp->travel)    
-        //查找左子树  
-        while ((temp->left) && (temp->travel != 1))
-        {    
-            parent = temp;
-            temp = temp->left;        
-        } 
-        callBack(temp->item);
-        count++;
-        //左边找到最小了 找右边分支
-        if(temp->right == NULL){
-        //该节点需要展示    
-        parent->travel = 1;    
-        temp = parent;
-        } else {
-          temp = parent->right;
-        }
-        }
+//删除树节点
+void DeleteAllNodes(Node * node){
+    if(node != NULL)
+    {
+        DeleteAllNodes(node->left);   
+        DeleteAllNodes(node->right);
+        free(node);
+        node->left = NULL;
+        node->right = NULL;
+    }
+}
+
+//循环删除树节点
+static void DeleteAllNodesLoop(Node * node, int size){
+  if(node){
+         Node *previousNode = node;
+         Node *tempArray[size];
+         int tempArraySize = 0; 
+         Node *parentArray[size];
+         int parentArraySize = 0;    
+         while (previousNode)
+         {    
+            //当前节点的左子节点不为空
+            if(previousNode -> left != NULL){
+                int index = parentArraySize-1;
+                //如果当前节点结合中包含改节点说明已经找到最小节点 此时改节点是回退节点 所以应该指向该节点的右子节点
+               if(index >= 0 && previousNode -> item.data == parentArray[index] -> item.data){
+                   tempArray[tempArraySize++] = previousNode;
+                   parentArray[--parentArraySize] = NULL;
+                   if(previousNode -> right != NULL){
+                    previousNode = previousNode->right;
+                   } else {
+                    if(index == 0){
+                     break;
+                    } else previousNode =  parentArray[parentArraySize-1];
+                   }
+               } else {
+                parentArray[parentArraySize++] = previousNode;
+                previousNode = previousNode->left; 
+               } 
+            } else {
+                //当前节点左子节点为空 右子节点不为空
+               if(previousNode -> right !=  NULL){
+                tempArray[tempArraySize++] = previousNode;
+                previousNode = previousNode->right; 
+               } else { //当前节点左右子节点都为空
+               tempArray[tempArraySize++] = previousNode;
+               if(parentArraySize-1 >= 0){
+                  previousNode = parentArray[parentArraySize-1];
+               } else break;  
+               } 
+            }
+         }
+         for(int i =  0; i < tempArraySize; i++){
+            free(tempArray[i]);
+            tempArray[i]->left = NULL;
+            tempArray[i]->right = NULL;
+         }
     }
 }

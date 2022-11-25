@@ -23,6 +23,12 @@
         "unordered_map": "c",
         "utility": "c",
         "vector": "c",
-        "__tuple": "c"
+        "__tuple": "c",
+        "utsname.h": "c",
+        "time.h": "c",
+        "ctype.h": "c",
+        "types.h": "c",
+        "pwd.h": "c",
+        "syslog.h": "c"
     }
 }

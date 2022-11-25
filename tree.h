@@ -18,6 +18,7 @@ typedef struct tree{
 typedef struct pair{
 Node *parent;
 Node *child;
+Node **childAddress;
 } Pair;
 typedef int (*Compare)(const Item *pi1, const Item *pi2);
 typedef void (*CallBack)(Item data);
@@ -40,21 +41,27 @@ void DeleteAll(Tree *tree);
 
 //遍历数据并回调
 void Traverse(const Tree *tree, CallBack callBack);
-//查找数据在书中的节点
+//循环的方式查找数据在树中的节点 
 Pair SeekItem(const Item *pi, const Tree *ptree, Compare compare);
+//递归方式查找数据在树中的节点
+Pair SeekItemRecursion(const Item *pi, Node **parent, Node **root, Compare compare);
 //够造数据节点
 Node * MakeNodes(const Item *pi);
-//添加数据节点到树种的位置
-void AddNodes(Node *newNode, Node *root, Compare compare);
+//递归方式添加数据节点到树种的位置
+bool AddNodes(Node *newNode, Node *root, Compare compare);
+//循环方式添加数据节点到树种的位置
+bool AddNodesLoop(Node *newNode, Node *root, Compare compare);
 //删除节点
 void DeleteNode(Node **ptr);
 //删除节点
 void DeleteNodeWithParent(Node* ptr, Node* parent, Tree *tree);
-//左右遍历树
+//递归左右遍历树
 void TraverseNode(const Node *node, CallBack callBack);
+//循环左右遍历树
+void TraverseNodeLoop(const Node *node, CallBack callBack, int size);
 //删除树节点
 static void DeleteAllNodes(Node * node);
 
-//遍历数据并回调
-void TraverseNotRecursion(const Tree *tree, CallBack callBack);
+//循环删除树节点
+static void DeleteAllNodesLoop(Node * node, int size);
 #endif
