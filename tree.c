@@ -120,9 +120,8 @@ Pair SeekItemRecursion(const Item *pi, Node **parent, Node **root, Compare compa
      pair = SeekItemRecursion(pi, root, &root[0]->left, compare);
    } else if(compare(pi, &(root[0]->item)) == 1){
      pair = SeekItemRecursion(pi, root, &root[0]->right, compare);
-   } else {
-     return pair; 
    }
+   return pair; 
 }
 
 Node * MakeNodes(const Item *pi){
@@ -231,7 +230,7 @@ void DeleteNodeWithParent(Node* ptr, Node* parent, Tree *tree){
     //判断要删除的点是左节点和右节点
     if(parent -> right == ptr){  
      if(temp != NULL){
-       //右侧有节点是有右侧 
+       //右侧有节点使用右侧节点
        parent -> right = ptr -> right;
      } else {
        //右侧没有接地啊使用左侧数据 

@@ -114,11 +114,11 @@ void testTree(){
 //  AddItem(&item10, &tree, compareItem);
 //  Traverse(&tree, showItem);
  Item item11 = {.data = 15};
- Pair pair = SeekItemRecursion(&item11, &tree.root, &tree.root, compareItem);
+ Pair pair = SeekItemRecursion(&tit2em, &tree.root, &tree.root, compareItem);
  if(pair.child != NULL){
         fprintf(stderr,"数据%d在树中\n", pair.child->item.data);  
     } else {
-     fprintf(stderr,"数据%d不在树中\n", item11.data);
+     fprintf(stderr,"数据%d不在树中\n", tit2em.data);
     } 
 //  printf("删除数据-->%d\n", item1.data);
 //  DeleteItem(&item1, &tree, compareItem);
