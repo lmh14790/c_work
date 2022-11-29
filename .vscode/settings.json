@@ -79,7 +79,8 @@
         "utsname.h": "c",
         "_types.h": "c",
         "errno.h": "c",
-        "termios.h": "c"
+        "termios.h": "c",
+        "avl_tree.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
