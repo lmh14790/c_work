@@ -56,7 +56,7 @@ bool DeleteItem(const Item *item, Tree *tree, Compare compare){
     // DeleteNode(pair.childAddress);
     tree->items--;
     return true;
-};
+}
 //数据是否在树里
 bool InTree(const Item *item, const Tree *tree, Compare compare){
     return SeekItem(item, tree, compare).child != NULL;
@@ -69,7 +69,7 @@ void DeleteAll(Tree *tree){
    tree->items = 0;
    tree->root = NULL;
  }
-};
+}
 //遍历数据并回调
 void Traverse(const Tree *tree, CallBack callBack){
      if(TreeIsEmpty(tree)){
