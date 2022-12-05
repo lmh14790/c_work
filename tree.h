@@ -15,6 +15,10 @@ typedef struct tree{
     Node *root;//树的根节点
     size_t items;//当前的数据数量
 } Tree;
+typedef struct LinkNode{
+    Node* data;
+    struct LinkNode *next;
+} LinkNode;
 typedef struct pair{
 Node *parent;
 Node *child;
@@ -22,6 +26,7 @@ Node **childAddress;
 } Pair;
 typedef int (*Compare)(const Item *pi1, const Item *pi2);
 typedef void (*CallBack)(Item data);
+typedef void (*NodeCallBack)(Node *data, int option, int count);
 //初始化树
 void InitializeTree(Tree *tree);
 //判断树是否已满
@@ -64,4 +69,16 @@ static void DeleteAllNodes(Node * node);
 
 //循环删除树节点
 static void DeleteAllNodesLoop(Node * node, int size);
+
+//广度遍历数据并回调
+void TraverseWidth(const Tree *tree, CallBack callBack);
+
+//够造数据节点
+static LinkNode * MakeLinkNodes(Node *pi);
+
+//遍历数据并回调
+void TraverseChangeNode(Node *root, int option, int count, NodeCallBack callBack);
+
+//操作节点的traval
+void option(Node *data, int option, int count);
 #endif

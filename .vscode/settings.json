@@ -80,7 +80,8 @@
         "_types.h": "c",
         "errno.h": "c",
         "termios.h": "c",
-        "avl_tree.h": "c"
+        "avl_tree.h": "c",
+        "math.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

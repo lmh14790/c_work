@@ -22,7 +22,14 @@ Node *child;
 Node **childAddress;
 } Pair;
 
-
+typedef struct LinkNode{
+    Node* data;
+    struct LinkNode *next;
+} LinkNode;
+typedef enum TYPE
+{
+  LL, RR, LR, RL
+} TYPE;
 typedef int (*Compare)(const Item *pi1, const Item *pi2);
 typedef void (*CallBack)(Item data);
 //初始化树
@@ -63,9 +70,32 @@ void TraverseNode(const Node *node, CallBack callBack);
 //循环左右遍历树
 void TraverseNodeLoop(const Node *node, CallBack callBack);
 //删除树节点
-static void DeleteAllNodes(Node * node);
-
+static void DeleteAllNodes(Node *node);
 //循环删除树节点
-static void DeleteAllNodesLoop(Node * node);
+static void DeleteAllNodesLoop(Node *node);
+//树的右旋
+static void rightRotate(Node **node);
+//树的左旋
+static void leftRotate(Node **node);
 
+//广度遍历数据并回调
+void TraverseWidth(const Tree *tree, CallBack callBack);
+
+//够造数据节点
+static LinkNode *MakeLinkNodes(Node *pi);
+
+//改变平衡因子
+void changeParentBanlanceFator(Node *node, bool isAdd);
+
+//获取不平和节点和不平衡类型
+Node* getUnBalanceFactor(Tree *node, TYPE *type);
+
+//获取不平和节点和不平衡类型
+int judgyLeftRight(Node *node);
+
+//平衡树
+void balanceRoot(Tree *tree);
+
+//获取节点的父节点在数上的位置
+Node** getNodeParentLocationAddress(Node *node, Tree *tree); 
 #endif

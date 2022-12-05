@@ -91,16 +91,16 @@ void testTree(){
      i--;
    }
   }
-//  Item item1 = {.data = 76};
-//  Item item2 = {.data = 55};
-//  Item item3 = {.data = 37};
-//  Item item4 = {.data = 3};
-//  Item item5 = {.data = 66};
-//  Item item6 = {.data = 35};
+//  Item item1 = {.data = 35};
+//  Item item2 = {.data = 10};
+//  Item item3 = {.data = 76};
+//  Item item4 = {.data = 2};
+//  Item item5 = {.data = 38};
+//  Item item6 = {.data = 13};
 //  Item item7 = {.data = 22};
-//  Item item8 = {.data = 1};
-//  Item item9 = {.data = 100};
-//  Item item10 = {.data = 99};
+//  Item item8 = {.data = 36};
+//  Item item9 = {.data = 46};
+//  Item item10 = {.data = 77};
 
 //  AddItem(&item1, &tree, compareItem);
 //  AddItem(&item2, &tree, compareItem);
@@ -113,25 +113,43 @@ void testTree(){
 //  AddItem(&item9, &tree, compareItem);
 //  AddItem(&item10, &tree, compareItem);
 //  Traverse(&tree, showItem);
- Item item11 = {.data = 15};
- Pair pair = SeekItemRecursion(&tit2em, &tree.root, &tree.root, compareItem);
- if(pair.child != NULL){
-        fprintf(stderr,"数据%d在树中\n", pair.child->item.data);  
-    } else {
-     fprintf(stderr,"数据%d不在树中\n", tit2em.data);
-    } 
-//  printf("删除数据-->%d\n", item1.data);
-//  DeleteItem(&item1, &tree, compareItem);
+//  TraverseWidth(&tree, showItem);
+//  Item item11 = {.data = 35};
+//  Pair pair = SeekItemRecursion(&tit2em, &tree.root, &tree.root, compareItem);
+//  if(pair.child != NULL){
+//         fprintf(stderr,"数据%d在树中\n", pair.child->item.data);  
+//     } else {
+//      fprintf(stderr,"数据%d不在树中\n", tit2em.data);
+//     } 
+//  printf("删除数据-->%d\n", item11.data);
+//  DeleteItem(&item11, &tree, compareItem);
 //  Traverse(&tree, showItem);
+//  TraverseWidth(&tree, showItem);
+//  Item item22 = {.data = 10};
+//  printf("删除数据-->%d\n", item22.data);
+//  DeleteItem(&item22, &tree, compareItem);
+//  Traverse(&tree, showItem);
+//  TraverseWidth(&tree, showItem);
+//  Item item33 = {.data = 36};
+//  printf("删除数据-->%d\n", item33.data);
+//  DeleteItem(&item33, &tree, compareItem);
+//  Traverse(&tree, showItem);
+//  TraverseWidth(&tree, showItem);
+
+//========================================
  printf("删除数据-->%d\n", titem.data);
  DeleteItem(&titem, &tree, compareItem);
  Traverse(&tree, showItem);
+ TraverseWidth(&tree, showItem);
  printf("删除数据-->%d\n", tit1em.data);
  DeleteItem(&tit1em, &tree, compareItem);
  Traverse(&tree, showItem);
+ TraverseWidth(&tree, showItem);
  printf("删除数据-->%d\n", tit2em.data);
  DeleteItem(&tit2em, &tree, compareItem);
  Traverse(&tree, showItem);
+ TraverseWidth(&tree, showItem);
  DeleteAll(&tree);
  Traverse(&tree, showItem);
+ TraverseWidth(&tree, showItem);
 }

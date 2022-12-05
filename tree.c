@@ -32,12 +32,15 @@ bool AddItem(const Item *item, Tree *tree, Compare compare){
     fprintf(stderr,"节点生成错误\n");
     return false;  
     }  
-    tree->items++;
     if(tree->root == NULL){
         tree->root = newNode;
+        newNode->travel = 1;
+        tree->items++;
         return true;
     } else {
-       return AddNodes(newNode, tree->root, compare);
+       bool res = AddNodes(newNode, tree->root, compare);
+       if(res) tree->items++;
+       return res;
     }
 }
 //删除数据
@@ -51,12 +54,12 @@ bool DeleteItem(const Item *item, Tree *tree, Compare compare){
         fprintf(stderr,"当前成员不在树结构中\n");
         return false;
     } 
-    if(pair.parent == NULL){
-        DeleteNodeWithParent(pair.child, pair.child, tree);
-    } else {
-        DeleteNodeWithParent(pair.child, pair.parent, tree);
-    }
-    // DeleteNode(pair.childAddress);
+    // if(pair.parent == NULL){
+    //     DeleteNodeWithParent(pair.child, pair.child, tree);
+    // } else {
+    //     DeleteNodeWithParent(pair.child, pair.parent, tree);
+    // }
+    DeleteNode(pair.childAddress);
     tree->items--;
     return true;
 }
@@ -142,6 +145,7 @@ bool AddNodes(Node *newNode, Node *root, Compare compare){
     if(compare(&(newNode->item), &(root->item)) == -1){
         if(root->left == NULL){
             root->left = newNode;
+            newNode->travel = root->travel+1;
             res = true;
         } else {
           res = AddNodes(newNode, root->left, compare);        
@@ -149,6 +153,7 @@ bool AddNodes(Node *newNode, Node *root, Compare compare){
     }  else if(compare(&(newNode->item), &(root->item)) == 1) {
         if(root->right == NULL){
             root->right = newNode;
+            newNode->travel = root->travel+1;
             res = true;
         } else {
          res = AddNodes(newNode, root->right, compare); 
@@ -168,6 +173,7 @@ bool AddNodesLoop(Node *newNode, Node *root, Compare compare){
       if(compare(&(newNode->item), &(previousNode->item)) == -1){
         if(previousNode->left == NULL){
             previousNode->left = newNode;
+            newNode->travel = previousNode->travel+1;
             res = true;
             break;
         } else {
@@ -176,6 +182,7 @@ bool AddNodesLoop(Node *newNode, Node *root, Compare compare){
     }  else if(compare(&(newNode->item), &(previousNode->item)) == 1) {
         if(previousNode->right == NULL){
             previousNode->right = newNode;
+            newNode->travel = previousNode->travel+1;
             res = true;
             break;
         } else {
@@ -198,14 +205,20 @@ void DeleteNode(Node **ptr){
     if(ptr[0] -> right == NULL){
        temp = ptr[0];
        ptr[0] = ptr[0] -> left;
+      TraverseChangeNode(temp->left, -1, 1, option); 
     } else {
-        temp = ptr[0];
+        temp = ptr[0]; 
         ptr[0] = ptr[0] -> right;
         Node* rightNodeMin =  ptr[0];
-        while (rightNodeMin -> left && rightNodeMin)
+        //找到(被删除的节点的右侧节点)的最小值
+        int increaseTravel = 0;
+        while (rightNodeMin && rightNodeMin -> left &&  temp->left)
         {
              rightNodeMin =  rightNodeMin -> left;
+             increaseTravel++;
         }
+        TraverseChangeNode(temp->right, -1, 1, option);
+        if(increaseTravel > 0) TraverseChangeNode(temp->left, 1, increaseTravel, option);
         rightNodeMin->left = temp->left;
     }
     if(temp != NULL){
@@ -226,11 +239,11 @@ void DeleteNodeWithParent(Node* ptr, Node* parent, Tree *tree){
     temp = ptr->right;
     //要删除的节点是跟节点
     if(ptr == parent){
-      if(ptr->right != NULL){
+      if(temp != NULL){
         tree->root = ptr->right;
       } else {
         tree->root = ptr->left;
-      } 
+      }
     } else {
     //判断要删除的点是左节点和右节点
     if(parent -> right == ptr){  
@@ -249,13 +262,23 @@ void DeleteNodeWithParent(Node* ptr, Node* parent, Tree *tree){
      } 
     }
     }
-    //找到最右测节点的最小值
-    while (temp && temp->left)
+   //找到(被删除的节点的右侧节点)的最小值
+    int increaseTravel = 0;
+    while (temp && temp->left && ptr->left)
     {
     temp = temp->left;
+    increaseTravel++;
     }
-    //将左侧节点赋值给最右侧节点的最小值
-    if(temp != NULL) temp->left = ptr->left;
+    //(被删除的节点的右侧节点不为空)右侧节点的最小值将左侧节点赋值给最
+    if(temp != NULL) {
+     TraverseChangeNode(ptr->right, -1, 1, option);   
+     temp->left = ptr->left;
+     //右侧节点的有左子节点
+     if(increaseTravel > 0) TraverseChangeNode(ptr->left, 1, increaseTravel, option);
+    } else {
+    //修改被删除节点的及其孩子节点的travel值
+     TraverseChangeNode(ptr->left, -1, 1, option); 
+    } 
     ptr->left = NULL;
     ptr->right = NULL;
     free(ptr);
@@ -374,4 +397,96 @@ static void DeleteAllNodesLoop(Node * node, int size){
             free(tempArray[i]);
          }
     }
+}
+
+void TraverseWidth(const Tree *tree, CallBack callBack){
+    if(tree->root == NULL) return;
+    LinkNode *linkNode = MakeLinkNodes(tree->root);
+    LinkNode *end = linkNode;
+    LinkNode *root = linkNode;
+    Node *current = linkNode->data;
+    while(current){      
+     if(current->left != NULL && current->right != NULL){
+        LinkNode* right = MakeLinkNodes(current->right);
+        LinkNode* Left = MakeLinkNodes(current->left);
+        end->next = Left;
+        end->next->next = right;
+        end = right;
+       linkNode = linkNode->next;
+       current = linkNode->data;
+     } else if(current->left != NULL){
+         LinkNode* Left = MakeLinkNodes(current->left);
+         end->next = Left;
+         end = Left;
+         linkNode = linkNode->next;
+         current = linkNode->data;
+     } else if(current->right != NULL){
+        LinkNode* right = MakeLinkNodes(current->right);
+        end->next = right;
+        end = right;
+        linkNode = linkNode->next;
+        current = linkNode->data;
+     } else {
+         linkNode = linkNode->next;
+        if(linkNode) {
+           current = linkNode->data;
+        } else {
+            current = NULL; 
+            break;
+        }
+     }
+    }
+    LinkNode *rootLink = root;
+     int lastTravel = 0;
+     printf("-----------");
+     while (rootLink)
+     {  
+        if(lastTravel == rootLink->data->travel){
+         printf("\t(%d, %d) ", rootLink->data->item.data,rootLink->data->travel);   
+        } else {
+          printf("\n(%d, %d) ", rootLink->data->item.data,rootLink->data->travel);  
+        }
+         lastTravel = rootLink->data->travel;
+         rootLink = rootLink->next;
+         
+     }
+     printf("\n-----------\n");   
+    while (root)
+    {
+       LinkNode* tem = root;
+       root = root->next;
+       tem->next = NULL;
+       tem->data = NULL;
+       free(tem); 
+    } 
+}
+
+static LinkNode * MakeLinkNodes(Node *pi){
+    LinkNode *newNode;
+    newNode = (LinkNode *)malloc(sizeof(LinkNode *));
+    if(newNode == NULL){
+           fprintf(stderr,"内存已满不能分配内存给LinkNode\n");
+           exit(1);  
+    }
+    newNode->data = pi;
+    newNode->next = NULL;
+    return newNode;
+}
+
+//遍历数据并回调
+void TraverseChangeNode(Node *root, int option, int count, NodeCallBack callBack){
+if(root){
+       TraverseChangeNode(root->left, option, count, callBack);
+       callBack(root, option, count);
+       TraverseChangeNode(root->right, option, count, callBack);
+    }
+}
+
+//操作节点的traval
+void option(Node *data, int option, int count){
+     if(option >= 0){
+        data->travel += count;
+     } else {
+        data->travel -= count;
+     }
 }
